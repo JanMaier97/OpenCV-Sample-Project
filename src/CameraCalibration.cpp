@@ -1,12 +1,20 @@
-/* #include <opencv2/core.hpp> */
-/* #include <opencv2/videoio.hpp> */
-/* #include <opencv2/highgui.hpp> */
+#include <opencv2/core.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
+//#define OPENCV_VERSION CVAUX_STR(CV_VERSION_MAJOR)"" CVAUX_STR(CV_VERSION_MINOR)"" CVAUX_STR(CV_VERSION_REVISION)
+//#if NDEBUG 
+//#pragma comment(lib, "opencv_world" OPENCV_VERSION ".lib")
+//#else
+//#pragma comment(lib, "opencv_world" OPENCV_VERSION "d.lib")
+//#endif
 
 using namespace cv;
 using namespace std;
 
-int main() {
+int test() {
     int numBoards = 0;
     int numCornersHor;
     int numCornersVer;
@@ -44,7 +52,8 @@ int main() {
 
         if(found)
         {
-            cornerSubPix(gray_image, corners, Size(11, 11), Size(-1, -1), TermCriteria(TermCriteria::Type::EPS | TermCriteria::Type::MAX_ITER, 30, 0.1));
+            printf("Found Corners");
+            cornerSubPix(gray_image, corners, Size(11, 11), Size(-1, -1), TermCriteria(TermCriteria::EPS | TermCriteria::MAX_ITER, 30, 0.1));
             drawChessboardCorners(gray_image, board_size, corners, found);
         }
 
@@ -94,24 +103,3 @@ int main() {
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
