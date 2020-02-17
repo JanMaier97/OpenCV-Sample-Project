@@ -17,7 +17,7 @@ find_package(OpenCV REQUIRED)
 # target_include_directories(OpenCVTest PRIVATE ./include)
 include_directories(include)
 
-add_subdirectory(third-party/json)
+# add_subdirectory(third-party/json)
 
 # create the variable SOURCES, which is a list of all source and header files
 set(SOURCES
@@ -31,7 +31,7 @@ set(SOURCES
 add_executable(OpenCVTest ${SOURCES})
 
 # add the link from the opencv libs
-target_link_libraries(OpenCVTest PRIVATE ${OpenCV_LIBS} nlohmann_json::nlohmann_json)
+target_link_libraries(OpenCVTest PRIVATE ${OpenCV_LIBS})# nlohmann_json::nlohmann_json)
 
 # Enable C++ 17 Standard
 set_target_properties(OpenCVTest PROPERTIES
