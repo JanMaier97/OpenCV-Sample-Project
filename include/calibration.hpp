@@ -1,3 +1,6 @@
+#ifndef CALIBRATION_H
+#define CALIBRATION_H
+
 #include <filesystem>
 #include <vector>
 
@@ -27,3 +30,5 @@ public:
 	void undistortImage(cv::Mat image);
 	
 };
+
+#endif
