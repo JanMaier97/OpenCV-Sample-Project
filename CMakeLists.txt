@@ -24,7 +24,9 @@ set(SOURCES
 	src/CameraCalibration.cpp
 	src/calibration.cpp
     src/main.cpp
-	include/calibration.hpp
+    src/feature-matching.cpp
+	# include/calibration.hpp
+    # include/feature-matching.hpp
 )
 
 # add the files from SOURCES to the executable
