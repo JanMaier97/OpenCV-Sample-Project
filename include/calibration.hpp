@@ -27,7 +27,7 @@ public:
 
 	void saveCalibration(std::filesystem::path filepath);
 
-	void undistortImage(cv::Mat image);
+    cv::Mat undistortImage(cv::Mat image);
 	
 };
 
