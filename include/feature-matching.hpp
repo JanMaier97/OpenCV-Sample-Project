@@ -6,6 +6,7 @@
 class FeatureMatching {
     private:
         Calibration calibration;
+        cv::Mat preprocessImage(cv::Mat image);
 
     public:
         FeatureMatching(Calibration cameraCalibration);
