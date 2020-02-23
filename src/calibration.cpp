@@ -22,12 +22,9 @@ void Calibration::saveCalibration(filesystem::path filepath) {
 
 }
 
-Mat Calibration::undistortImage(Mat image) {
+void Calibration::undistortImage(InputArray image, OutputArray undistortedImage) {
     // TODO: try out using getOptimalNewCameraMatrix as an additional paramter
-    // it could improve the resulting image
-    Mat undistortedImage;
     undistort(image, undistortedImage, cameraMatrix, distortionCoefficients);
-    return undistortedImage;
 }
 
 void Calibration::loadCalibration(filesystem::path filepath) {
