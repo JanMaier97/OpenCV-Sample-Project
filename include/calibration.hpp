@@ -13,6 +13,7 @@ class Calibration {
 
 private:	
     cv::Mat cameraMatrix = cv::Mat(3, 3, CV_32FC1);
+    cv::Mat optimalCameraMatrix;
     cv::Mat distortionCoefficients;
     std::vector<cv::Mat> rotationVectors;
     std::vector<cv::Mat> translationVectors;
