@@ -3,6 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <iostream>
 
@@ -27,8 +28,8 @@ vector<Mat> FeatureMatching::findMatches(Mat image1, Mat image2) {
     // parameters: nfeatures=500, scaleFactor=1.2f, nlevels=8, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=ORB::HARRIS_SCORE, patchSize=31, fastThreshold=20
     Ptr<ORB> orb = ORB::create(2000, 1.2f, 8, 31, 0, 4, ORB::HARRIS_SCORE, 31, 30);
 
-    orb->detectAndCompute(image1, noArray(), keyPoints1, descriptors1);
-    orb->detectAndCompute(image2, noArray(), keyPoints2, descriptors2);
+    orb->detectAndCompute(processedImage1, noArray(), keyPoints1, descriptors1);
+    orb->detectAndCompute(processedImage2, noArray(), keyPoints2, descriptors2);
 
     // use NORM_HAMMING2 when WTA_K = 3 or 4 for ORB
     Ptr<BFMatcher> matcher =  BFMatcher::create(NORM_HAMMING2, true);
@@ -40,7 +41,7 @@ vector<Mat> FeatureMatching::findMatches(Mat image1, Mat image2) {
     filterMatches(keyPoints1, keyPoints2, matches, filteredMatches, image1.size());
 
     Mat drawnMatches;
-    drawMatches(image1, keyPoints1, image2, keyPoints2, filteredMatches, drawnMatches);;
+    drawMatches(processedImage1, keyPoints1, processedImage2, keyPoints2, filteredMatches, drawnMatches);;
 
     namedWindow("Matches", WINDOW_FREERATIO);
     imshow("Matches", drawnMatches);
@@ -62,9 +63,19 @@ vector<Mat> FeatureMatching::findMatches(Mat image1, Mat image2) {
 }
 
 
-void FeatureMatching::preprocessImage(InputArray image, OutputArray processedImage) {
+void FeatureMatching::preprocessImage(Mat image, OutputArray processedImage) {
+
+    // remove distortion from image so that straight lines are straigt
     calibration.undistortImage(image, processedImage);
+
+    // transform to grey color, with only one channel (required by histogramm)
+    cvtColor(processedImage, processedImage, COLOR_BGR2GRAY);   
+    
+    /* Mat convertedImage; */
+    /* image.convertTo(convertedImage, CV_8UC1, 1.0/255); */
+
     //TODO: test out filters (Heurisitc, FFT)
+    equalizeHist(processedImage, processedImage);
 }
 
 

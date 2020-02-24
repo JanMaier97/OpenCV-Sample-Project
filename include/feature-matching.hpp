@@ -6,7 +6,7 @@
 class FeatureMatching {
     private:
         Calibration calibration;
-        void preprocessImage(cv::InputArray image, cv::OutputArray processedImage);
+        void preprocessImage(cv::Mat image, cv::OutputArray processedImage);
         void filterMatches(const std::vector<cv::KeyPoint> keypoints1, const std::vector<cv::KeyPoint> keypoints2, const std::vector<cv::DMatch> &matches, std::vector<cv::DMatch> &filteredMatches, cv::Size imageSize);
 
     public:
