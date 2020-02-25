@@ -38,8 +38,10 @@ int main(int argc, char *argv[]) {
     /* cv::imshow("Matches", img2); */
     /* cv::waitKey(0); */
 
+    vector<cv::Point2f> imagePoints1;
+    vector<cv::Point2f> imagePoints2;
     FeatureMatching featureMatching = FeatureMatching(calb);
-    featureMatching.findMatches(img1, img2);
+    featureMatching.findMatches(img1, img2, imagePoints1, imagePoints2);
     
     cout << "matching successful" << endl;
 }
