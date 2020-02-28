@@ -13,6 +13,7 @@ private:
     cv::Mat distortionCoefficients;
     std::vector<cv::Mat> rotationVectors;
     std::vector<cv::Mat> translationVectors;
+    const std::string cameraMatrixSerName = "cameraMatrix";
 
 public:
 	Calibration(std::filesystem::path filepath);
