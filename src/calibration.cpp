@@ -28,8 +28,9 @@ void Calibration::saveCalibration(filesystem::path filepath) {
     cout << "Successfully saved calibration!" << endl;
 }
 
-void Calibration::undistortImage(Mat image) {
-
+void Calibration::undistortImage(InputArray image, OutputArray undistortedImage) {
+    // TODO: try out using getOptimalNewCameraMatrix as an additional paramter
+    undistort(image, undistortedImage, cameraMatrix, distortionCoefficients, optimalCameraMatrix);
 }
 
 void Calibration::loadCalibration(filesystem::path filepath) {
@@ -53,8 +54,9 @@ void Calibration::calibrate(vector <filesystem::path> imageFiles, Size boardSize
     }
 
     Mat currentImage;
-    for (auto const &imagePath: imageFiles) {
-        currentImage = imread(imagePath.string(), IMREAD_GRAYSCALE);
+    for (auto const& imagePath: imageFiles) {
+        currentImage = imread(imagePath.string());
+        cvtColor(currentImage, currentImage, cv::COLOR_BGR2GRAY);
 
         std::cout << "Trying to find corners in file " << imagePath.filename() << ": ";
 
@@ -78,4 +80,8 @@ void Calibration::calibrate(vector <filesystem::path> imageFiles, Size boardSize
                                                distortionCoefficients, rotationVectors, translationVectors);
 
     cout << "Camera calibrated with output " << calibrationOutput << endl;
+
+    // optimize cameraMatrix
+    if (!currentImage.empty())
+        optimalCameraMatrix = getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, currentImage.size(), 1, currentImage.size());
 }

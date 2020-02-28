@@ -1,6 +1,9 @@
-#include <calibration.hpp>
+#include "feature-matching.hpp"
+#include "calibration.hpp"
 #include <string>
 #include <filesystem>
+
+#include <iostream>
 
 
 using namespace std;
@@ -24,5 +27,23 @@ int main(int argc, char *argv[]) {
 
     calb.loadCalibration("./resources/calibration.xml");
 
-    printf("Execution successful");
+    cout << "calibration successful" << endl;
+
+   
+    cv::Mat img1 = cv::imread("./resources/guitar_images/20200223_125417880_iOS.jpg");
+    /* cv::Mat img1 = cv::imread("./resources/guitar_images/20200223_125427418_iOS.jpg", cv::IMREAD_GRAYSCALE); */
+    cv::Mat img2 = cv::imread("./resources/guitar_images/20200223_125447874_iOS.jpg");
+
+    /* cv::namedWindow("Matches", cv::WINDOW_FREERATIO); */
+    /* cv::imshow("Matches", img1); */
+    /* cv::waitKey(0); */
+    /* cv::imshow("Matches", img2); */
+    /* cv::waitKey(0); */
+
+    vector<cv::Point2f> imagePoints1;
+    vector<cv::Point2f> imagePoints2;
+    FeatureMatching featureMatching = FeatureMatching(calb);
+    featureMatching.findMatches(img1, img2, imagePoints1, imagePoints2);
+    
+    cout << "matching successful" << endl;
 }
