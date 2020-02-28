@@ -22,8 +22,10 @@ int main(int argc, char *argv[]) {
     unsigned int cornersRow = 6;
     unsigned int cornersColumn = 9;
 
+    //calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+    //calb.saveCalibration("./resources/calibration.xml");
 
-    calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+    calb.loadCalibration("./resources/calibration.xml");
 
     cout << "calibration successful" << endl;
 
