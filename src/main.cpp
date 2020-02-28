@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
     Calibration calb = Calibration();
 
-    filesystem::path path(".\\resources\\chessboard_images");
+    filesystem::path path("./resources/chessboard_images");
 
     vector<filesystem::path> filepaths;
     for (const auto& entry : filesystem::directory_iterator(path)) {
@@ -19,8 +19,10 @@ int main(int argc, char *argv[]) {
     unsigned int cornersRow = 6;
     unsigned int cornersColumn = 9;
 
+    //calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+    //calb.saveCalibration("./resources/calibration.xml");
 
-    calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+    calb.loadCalibration("./resources/calibration.xml");
 
     printf("Execution successful");
 }
