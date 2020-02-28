@@ -142,7 +142,7 @@ void FeatureMatching::filterMatches(const vector<KeyPoint> keypoints1, const vec
 
         if ( currentDistance < distanceLimit && currentHeightDifference < maxHeightDifference && queryKeyPoint.pt.y - trainKeyPoint.pt.y > minHeightDifference) {
             filteredMatches.push_back(match);
-            cout << queryKeyPoint.pt.y - trainKeyPoint.pt.y << endl;
+            /* cout << queryKeyPoint.pt.y - trainKeyPoint.pt.y << endl; */
         } else {
             /* cout << "Current Height diff: "<< currentHeightDifference << " vs " << maxHeightDifference << endl; */
             /* filteredMatches.push_back(match); */
