@@ -17,11 +17,15 @@ private:
     cv::Mat distortionCoefficients;
     std::vector<cv::Mat> rotationVectors;
     std::vector<cv::Mat> translationVectors;
+
     std::string cameraMatrixSerName = "cameraMatrix";
+    std::string optimalMatrixSerName = "optimalMatrix";
+    std::string distortionCoefficientsSerName = "distortionCoefficients";
 
 public:
 	Calibration(std::filesystem::path filepath);
 	Calibration();
+
     const cv::Mat& getCameraMatrix() const {return cameraMatrix;}
     const cv::Mat& getInstrincs() const {return cameraMatrix;}
 

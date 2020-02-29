@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         unsigned int cornersColumn = 9;
 
         calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
-        calb.saveCalibration("calibration.xml");
+        calb.saveCalibration(calibrationFile);
     } else {
         calb.loadCalibration(calibrationFile);
     }
