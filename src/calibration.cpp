@@ -1,8 +1,11 @@
 #include "calibration.hpp"
-#include <iostream>
-#include <fstream>
-#include <exception>
+
 #include <opencv2/imgproc.hpp>
+
+#include <exception>
+#include <fstream>
+#include <iostream>
+
 
 using namespace std;
 using namespace cv;
@@ -17,10 +20,17 @@ Calibration::Calibration(filesystem::path filepath) {
     this->loadCalibration(filepath);
 }
 
-
 void Calibration::saveCalibration(filesystem::path filepath) {
-    cout << "Saving calibration to " << filepath.c_str() << endl;
+    if (!filepath.has_filename())
+        throw runtime_error("The provided filepath " + filepath.string() + "  is not a file.");
 
+    filesystem::path directoryPath = filepath.parent_path();
+    
+    if (!directoryPath.empty() && !filesystem::exists(directoryPath))
+        throw runtime_error("The provieded directoryPath " + directoryPath.string() + " does not exist.");
+
+    cout << "Saving calibration to " << filepath.c_str() << endl;
+    
     cv::FileStorage fs(filepath, cv::FileStorage::WRITE);
     fs << cameraMatrixSerName << cameraMatrix;
     fs.release();
@@ -34,6 +44,9 @@ void Calibration::undistortImage(InputArray image, OutputArray undistortedImage)
 }
 
 void Calibration::loadCalibration(filesystem::path filepath) {
+    if (!filesystem::exists(filepath))
+        throw runtime_error("The file does not exist.");
+
     cout << "Loading calibration from file " << filepath.c_str() << endl;
 
     cv::FileStorage fs(filepath, cv::FileStorage::READ);
