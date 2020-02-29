@@ -2,6 +2,7 @@
 #include "calibration.hpp"
 #include <string>
 #include <filesystem>
+#include "model-exporters.hpp"
 
 #include <iostream>
 
@@ -46,4 +47,14 @@ int main(int argc, char *argv[]) {
     featureMatching.findMatches(img1, img2, imagePoints1, imagePoints2);
     
     cout << "matching successful" << endl;
+    cv::Mat test = (cv::Mat_<float>(3,5) << 5, 5, 5, 
+                                             10, 20, 10,
+                                             15, 13, 15,
+                                             30, 20, 20,
+                                             20, 10, 25);
+
+   PlyModelExporter exporter;
+
+   exporter.exportPointCloud("./resources/test.ply", test);
+
 }
