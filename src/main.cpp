@@ -4,6 +4,8 @@
 
 #include <string>
 #include <filesystem>
+#include "model-exporters.hpp"
+
 #include <iostream>
 
 
@@ -12,19 +14,27 @@ using namespace std;
 int main(int argc, char *argv[]) {
     Calibration calb = Calibration();
 
+
+    filesystem::path calibrationFile("./resources/calibration.xml");
     filesystem::path path("./resources/chessboard_images");
 
-    vector<filesystem::path> filepaths;
-    for (const auto& entry : filesystem::directory_iterator(path)) {
-        filepaths.push_back(entry.path());
+    if (!filesystem::exists(calibrationFile)) {
+        vector<filesystem::path> filepaths;
+        for (const auto& entry : filesystem::directory_iterator(path)) {
+            filepaths.push_back(entry.path());
+        }
+
+        // number of inner corners per chessboard row and column
+        unsigned int cornersRow = 6;
+        unsigned int cornersColumn = 9;
+
+        calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+        calb.saveCalibration(calibrationFile);
+    } else {
+        calb.loadCalibration(calibrationFile);
     }
 
-    // number of inner corners per chessboard row and column
-    unsigned int cornersRow = 6;
-    unsigned int cornersColumn = 9;
-
-
-    calb.calibrate(filepaths, cv::Size(cornersColumn, cornersRow));
+    /* calb.loadCalibration("./resources/calibration.xml"); */
 
     cout << "calibration successful" << endl;
 
@@ -56,5 +66,14 @@ int main(int argc, char *argv[]) {
 
 
 
+    cv::Mat test = (cv::Mat_<float>(3,5) << 5, 5, 5, 
+                                             10, 20, 10,
+                                             15, 13, 15,
+                                             30, 20, 20,
+                                             20, 10, 25);
+
+   PlyModelExporter exporter;
+
+   exporter.exportPointCloud("./resources/test.ply", test);
 
 }

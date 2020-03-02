@@ -63,48 +63,7 @@ void FeatureMatching::findMatches(Mat image1, Mat image2, vector<Point2f> &image
     // return masked keypoints as points2f
     KeyPoint::convert(keyPoints1, imagePoints1, keypointIndexes1);
     KeyPoint::convert(keyPoints2, imagePoints2, keypointIndexes2);
-
-    /* cout << key.size() << endl; */
-    /* cout << KeyPoint.size() << endl; */
-
-    /* cout << "finding fundamental" << endl; */
-    /* Mat fundamentalMask; */
-    /* Mat fundamentalCameraMat = cv::findFundamentalMat(imagePoints1, imagePoints2, FM_RANSAC, 3, 0.99, fundamentalMask); */
-    /* Mat essentialCameraMat = cv::findEssentialMat(imagePoints1, imagePoints2, calibration.getCameraMatrix()); */
-    /* Mat essentialCameraMat2 = calibration.getInstrincs().t() * fundamentalCameraMat * calibration.getInstrincs(); */
-
-    /* vector<uchar> indexes; */
-    /* if (fundamentalMask.isContinuous()) { */
-    /*     indexes.assign(fundamentalMask.data, fundamentalMask.data + fundamentalMask.total()); */
-    /* } */
-    /* cout << indexes << endl; */
-
-    /* vector<Point2f> filteredImagePoints1; */
-    /* vector<Point2f> filteredImagePoints2; */
-
-    /* for (size_t i = 0; i < indexes.size(); i++) { */
-    /*     if (indexes[i] == 1) { */
-    /*         filteredImagePoints1.push_back(imagePoints1[i]); */
-    /*         filteredImagePoints2.push_back(imagePoints2[i]); */
-    /*     } */
-    /* } */
-
-    /* vector<cv::Vec3f> lines1; */
-    /* vector<cv::Vec3f> lines2; */
-    /* computeCorrespondEpilines(filteredImagePoints2, 2, fundamentalCameraMat, lines1); */
-    /* computeCorrespondEpilines(filteredImagePoints1, 1, fundamentalCameraMat, lines2); */
-
-    /* drawEpipolarLines(processedImage1, processedImage1, processedImage2, filteredImagePoints1, filteredImagePoints2, lines1); */
-
-    /* drawEpipolarLines(processedImage2, processedImage2, processedImage1, filteredImagePoints2, filteredImagePoints1, lines2); */
-
-    /* namedWindow("Image1", WINDOW_FREERATIO); */
-    /* imshow("Image1", processedImage1); */
-    /* namedWindow("Image2", WINDOW_FREERATIO); */
-    /* imshow("Image2", processedImage2); */
-    /* waitKey(0); */
 }
-
 
 
 void FeatureMatching::preprocessImage(Mat image, OutputArray processedImage) {
@@ -114,16 +73,19 @@ void FeatureMatching::preprocessImage(Mat image, OutputArray processedImage) {
 
     // transform to grey color, with only one channel (required by histogramm)
     cvtColor(processedImage, processedImage, COLOR_BGR2GRAY);   
-    
-    /* Mat convertedImage; */
-    /* image.convertTo(convertedImage, CV_8UC1, 1.0/255); */
 
-    //TODO: test out filters (Heurisitc, FFT)
+    // apply histogram filter to incease contrast
     equalizeHist(processedImage, processedImage);
+
+    // TODO: apply more filters
 }
 
 
-void FeatureMatching::filterMatches(const vector<KeyPoint> keypoints1, const vector<KeyPoint> keypoints2, const vector<DMatch> &matches, vector<DMatch> &filteredMatches, Size imageSize){
+void FeatureMatching::filterMatches(const vector<KeyPoint> keypoints1,
+                                    const vector<KeyPoint> keypoints2,
+                                    const vector<DMatch> &matches,
+                                    vector<DMatch> &filteredMatches,
+                                    Size imageSize){
     
     // max distance for matches is 25% of the max distance / image diagonal
     double distanceLimit = 0.25f * sqrt(pow(imageSize.height, 2) + pow(imageSize.width, 2));
@@ -140,44 +102,12 @@ void FeatureMatching::filterMatches(const vector<KeyPoint> keypoints1, const vec
         double currentDistance = sqrt(pow(queryKeyPoint.pt.x - trainKeyPoint.pt.x, 2) + pow(queryKeyPoint.pt.y - trainKeyPoint.pt.y, 2));
         double currentHeightDifference = abs(queryKeyPoint.pt.y - trainKeyPoint.pt.y);
 
-        if ( currentDistance < distanceLimit && currentHeightDifference < maxHeightDifference && queryKeyPoint.pt.y - trainKeyPoint.pt.y > minHeightDifference) {
+        // TODO: use better filters
+        // this test is not applicable to other images
+        if (currentDistance < distanceLimit && currentHeightDifference < maxHeightDifference && queryKeyPoint.pt.y - trainKeyPoint.pt.y > minHeightDifference) {
             filteredMatches.push_back(match);
-            /* cout << queryKeyPoint.pt.y - trainKeyPoint.pt.y << endl; */
         } else {
-            /* cout << "Current Height diff: "<< currentHeightDifference << " vs " << maxHeightDifference << endl; */
-            /* filteredMatches.push_back(match); */
             filterCounter++;
         }
     }
-    cout << "Filtered matches: " << filterCounter << endl;
 }
-
-/* void FeatureMatching::drawEpipolarLines(cv::Mat& image_out, */
-/* cv::Mat& image1, */
-/* cv::Mat& image2, */
-/* std::vector<cv::Point2f>& points1, // keypoints 1 */
-/* std::vector<cv::Point2f>& points2, // keypoints 2 */
-/* vector<Vec3f> lines) // image to compute epipolar lines in */
-/* { */
-/*     // Compute F matrix from 7 matches */ 
-/*     /1* cv::Mat F = cv::findFundamentalMat(cv::Mat(points1), // points in object image *1/ */
-/*     /1*                                    cv::Mat(points2), // points in scene image *1/ */
-/*     /1*                                    cv::FM_7POINT); // 7-point method *1/ */
-/*     /1* std::vector<cv::Vec3f> lines1; *1/ */
-
-/*     /1* // Compute corresponding epipolar lines *1/ */
-/*     /1* cv::computeCorrespondEpilines(cv::Mat(points1), // image points *1/ */
-/*     /1*                               whichImage, // in image 1 (can also be 2) *1/ */
-/*     /1*                               F, // F matrix *1/ */
-/*     /1*                               lines); // vector of epipolar lines *1/ */
-/*     // for all epipolar lines */
-/*     for (std::vector<cv::Vec3f>::const_iterator it = lines.begin(); it!=lines.end(); ++it) */
-/*     { */
-/*         // Draw the line between first and last column */
-/*         cv::line(image_out, */
-/*                  cv::Point(0,-(*it)[2]/(*it)[1]), */
-/*                  cv::Point(image2.cols, */
-/*                            -((*it)[2] + (*it)[0] * image2.cols) / (*it)[1]), */
-/*                  cv::Scalar(255,255,255)); */
-/*     } */
-/* } */

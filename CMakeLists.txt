@@ -25,6 +25,7 @@ set(SOURCES
 	src/calibration.cpp
     src/main.cpp
     src/feature-matching.cpp
+    src/ply-model-exporter.cpp
     src/essential-matrix.cpp
 	# include/calibration.hpp
     # include/feature-matching.hpp
