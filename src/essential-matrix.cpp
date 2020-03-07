@@ -1,5 +1,7 @@
 #include "essentialMatrix.hpp"
 #include <opencv2/calib3d.hpp>
+#include "model-exporters.hpp"
+#include "stdlib.h"
 
 #include <iostream>
 
@@ -11,19 +13,12 @@ EssentialMatrix::EssentialMatrix(Calibration cameraCalibration) {
 }
 
 
-Mat EssentialMatrix::normalizePoints(const Mat& K_inverse,
-                                     const vector<Point2f>& imagePoints) {
-    Mat normalizedPoints(imagePoints.size(), 3, K_inverse.type());
+Mat EssentialMatrix::normalizePoints(const vector<Point2f>& imagePoints) {
+    Mat_<double> normalizedPoints(imagePoints.size(), 3);
 
     for (const auto &point: imagePoints) {
         Mat x = (Mat_<double>(1,3) << point.x, point.y, 1.0);
-        cout << x.size() << " vs " << normalizedPoints.cols << endl;
-        normalizedPoints.push_back(
-                /* (K_inverse * (Mat_<double>(3,1) << point.x, point.y, 1.0)).t() */
-            /* (Mat_<double>(1,3) << point.x, point.y, 1.0) */
-            /* vector<double>{point.x, point.y, 1.0} */
-            x
-        );
+        normalizedPoints.push_back(x);
     }
     return normalizedPoints;
 }
@@ -39,11 +34,10 @@ vector<T> EssentialMatrix::applyMask(const vector<T>& input,
     return output;
 }
 
-void EssentialMatrix::determineEssentialMatrix(
-                            const vector<Point2f> &pointsCamera1,
-                            const vector<Point2f> &pointsCamera2, 
-                            OutputArray &cameraRotation,
-                            OutputArray &cameraTranslation) {
+void EssentialMatrix::determineEssentialMatrix(const vector<Point2f> &pointsCamera1,
+                                               const vector<Point2f> &pointsCamera2, 
+                                               Mat &cameraRotation,
+                                               Mat &cameraTranslation) {
 
     cout << "Determining essentialMatrix" << endl;
 
@@ -51,86 +45,34 @@ void EssentialMatrix::determineEssentialMatrix(
     vector<uchar> fundamentalMask;
     Mat fundametalMatrix = findFundamentalMat(pointsCamera1, pointsCamera2, FM_RANSAC, 0.1, 0.99, fundamentalMask);
 
-    cout << " fundametalMatrix:" << endl;
-    cout << fundametalMatrix << endl;
-    /* cout << "mask:" << endl; */
-    /* cout << fundamentalMask << endl; */
+    /* cout << " fundametalMatrix:" << endl; */
+    /* cout << fundametalMatrix << endl; */
 
-    Mat K_inverse = cameraCalibration.getInstrincs().inv();
-    Mat inliers1 = normalizePoints(K_inverse, applyMask<Point2f>(pointsCamera1, fundamentalMask));
-    Mat inliers2 = normalizePoints(K_inverse, applyMask<Point2f>(pointsCamera2, fundamentalMask));
+    Mat inliners1 = normalizePoints(applyMask<Point2f>(pointsCamera1, fundamentalMask));
+    Mat inliners2 = normalizePoints(applyMask<Point2f>(pointsCamera2, fundamentalMask));
 
     Mat essentialMatrix = cameraCalibration.getInstrincs().t() * fundametalMatrix * cameraCalibration.getInstrincs();
 
-    cout << "Essential matrix: " << endl;
-    cout << essentialMatrix << endl;
+    /* cout << "Essential matrix: " << endl; */
+    /* cout << essentialMatrix << endl; */
 
     // decomposes the essential matrix into 2 possible rotation matrices and 1 translation vector
     Mat rotation, translation;
-    decomposeEssentialMatrix(essentialMatrix, inliers1, inliers2,  rotation,  translation);
+    decomposeEssentialMatrix(essentialMatrix, inliners1, inliners2,  cameraRotation,  cameraTranslation);
 
-    /* Mat I = (Mat_<double>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1); */
-    /* Mat t = (Mat_<double>(3,1) << 0, 0, 0); */
-    /* Mat extrincts_p1; */
-
-    /* cout << I.type() << endl; */
-
-    /* hconcat(I, t, extrincts_p1); */
-    /* Mat p1 = cameraCalibration.getInstrincs() * extrincts_p1; */
-
-    /* Mat extrincts_p2_1; */
-    /* Mat extrincts_p2_2; */
-    /* Mat extrincts_p2_3; */
-    /* Mat extrincts_p2_4; */
-
-    /* hconcat(rotation1, translation, extrincts_p2_1); */
-    /* hconcat(rotation1, -translation, extrincts_p2_2); */
-    /* hconcat(rotation2, translation, extrincts_p2_3); */
-    /* hconcat(rotation2, -translation, extrincts_p2_4); */
-    
-    /* Mat p2_1 = cameraCalibration.getInstrincs() * extrincts_p2_1; */
-    /* Mat p2_2 = cameraCalibration.getInstrincs() * extrincts_p2_2; */
-    /* Mat p2_3 = cameraCalibration.getInstrincs() * extrincts_p2_3; */
-    /* Mat p2_4 = cameraCalibration.getInstrincs() * extrincts_p2_4; */
-    
-    /* projectionCamera1 = cameraRotation.getInstrincs() * */ 
-
-    /* cv::Mat worldPoints1(1, pointsCamera1.size(), CV_64FC4); */
-    /* cv::Mat worldPoints2(1, pointsCamera1.size(), CV_64FC4); */
-    /* cv::Mat worldPoints3(1, pointsCamera1.size(), CV_64FC4); */
-    /* cv::Mat worldPoints4(1, pointsCamera1.size(), CV_64FC4); */
-
-    /* cv::triangulatePoints(p1, p2_1, pointsCamera1, pointsCamera2, worldPoints1); */
-    /* cv::triangulatePoints(p1, p2_2, pointsCamera1, pointsCamera2, worldPoints2); */
-    /* cv::triangulatePoints(p1, p2_3, pointsCamera1, pointsCamera2, worldPoints3); */
-    /* cv::triangulatePoints(p1, p2_4, pointsCamera1, pointsCamera2, worldPoints4); */
-    
-    /* cout << worldPoints1 << endl; */
-    /* cout << worldPoints2 << endl; */
-    /* cout << worldPoints3 << endl; */
-    /* cout << worldPoints4 << endl; */
-
-    /* cout << " counting ..." << endl; */
-    /* numberOfPointsInfront(worldPoints1, rotation1, translation); */
+    cout << "found rotation and camera rotation" << endl;
 }
-
-
-Mat EssentialMatrix::computeCameraCenter(const Mat &cameraRotation,
-                                         const Mat &cameraTranslation) {
-    return -1 * cameraRotation.t() * cameraTranslation;
-}
-
 
 
 void EssentialMatrix::decomposeEssentialMatrix(const Mat &essentialMatrix,
-                                               const Mat &inliers1,
-                                               const Mat &inliers2,
+                                               const Mat &inliners1,
+                                               const Mat &inliners2,
                                                Mat &rotation,
                                                Mat &translation) {
 
     assert(essentialMatrix.rows == 3 && essentialMatrix.cols == 3);
-    assert(inliers1.cols == 3);
-    assert(inliers2.cols == 3);
+    assert(inliners1.cols == 3);
+    assert(inliners2.cols == 3);
     
     Mat rotation1, rotation2, trans;
     decomposeEssentialMat(essentialMatrix, rotation1, rotation2, trans);
@@ -141,15 +83,13 @@ void EssentialMatrix::decomposeEssentialMatrix(const Mat &essentialMatrix,
     vector<Mat> translations = {trans, -trans, trans, -trans};
 
     for (size_t i = 0; i < rotations.size(); i++) {
-        currentPointsInfront = pointsInfrontCamera(inliers1, inliers2, rotations[i], translations[i]);
+        currentPointsInfront = pointsInfrontCamera(inliners1, inliners2, rotations[i], translations[i]);
+        cout << "found " << currentPointsInfront << " points in front of camera." << endl;
 
         if (currentPointsInfront > pointsInfront) {
             pointsInfront = currentPointsInfront;
             rotation = rotations[i];
             translation = translations[i];
-        }
-        if (currentPointsInfront == pointsInfront) {
-            cout << "found rotation and translation with the same count of " << pointsInfront << endl;
         }
     }
 
@@ -172,26 +112,29 @@ int EssentialMatrix::pointsInfrontCamera(const cv::Mat inliners1,
     assert(inliners1.rows == inliners2.rows);
     assert(cameraRotation.cols == 3 && cameraRotation.rows == 3);
     assert(cameraTranslation.rows == 3 && cameraTranslation.cols == 1);
-
-    cout << "checking points in front of camera." << endl;
     
     int count = 0;
+    Mat worldPoints1;
+    Mat worldPoints2;
     for (size_t index = 0; index < inliners1.rows; index++) {
+        double z1 = calculateDepth(cameraRotation.row(0), cameraRotation.row(2), cameraTranslation, inliners2.at<double>(index, 0), inliners1.row(index).t());
 
-        double first_z = calculateDepth(cameraRotation.row(0), cameraRotation.row(2), cameraTranslation, inliners2.at<double>(index, 0), inliners1.row(index).t());
+        double z2 = calculateDepth(cameraRotation.row(1), cameraRotation.row(2), cameraTranslation, inliners2.at<double>(index, 1), inliners1.row(index).t());
 
-        double second_z = calculateDepth(cameraRotation.row(1), cameraRotation.row(2), cameraTranslation, inliners2.at<double>(index, 1), inliners1.row(index).t());
+        double x1 = inliners1.at<double>(index, 0) * z1;
+        double y1 = inliners1.at<double>(index, 1) * z1;
 
-        cout << first_z << " && " << second_z << endl;
-        if (first_z > 0 && second_z > 0) { 
+        double x2 = inliners1.at<double>(index, 0) * z2;
+        double y2 = inliners1.at<double>(index, 1) * z2;
+
+        worldPoints1.push_back(Mat(1, 3, CV_32FC1, {x1, y1, z1}));
+        worldPoints2.push_back(Mat(1, 3, CV_32FC1, {x2, y2, z2}));
+
+        if (z1 > 0 && z2 > 0) { 
             count++;
         }
-
-        /* if (first_z < 0 || second_z << 0) */
-        /*     return false; */
-
     }
-    /* cout << "Counted " << count << " points from " << inliners1.size() << " in camera" << endl; */
+
     return count;
 }
 
@@ -205,15 +148,8 @@ double EssentialMatrix::calculateDepth(const Mat &rotationRow1,
     assert(rotationRow2.rows == 1 && rotationRow2.cols == 3);
     assert(translation.rows == 3 && translation.cols == 1);
     assert(imagePoint1.rows == 3 && imagePoint1.cols == 1);
-
     
     Mat point = (rotationRow1 - respectivePoint * rotationRow2).t();
 
-    /* cout << point.size() << endl; */
-    /* cout << translation.size() << endl; */
-    /* cout << imagePoint1.size() << endl; */
-
     return point.dot(translation) / point.dot(imagePoint1);
 }
-
-

@@ -13,10 +13,6 @@ class EssentialMatrix {
                                  const cv::Mat &cameraRotation,
                                  const cv::Mat &cameraTranslation);
 
-
-        cv::Mat computeCameraCenter(const cv::Mat &cameraRotation,
-                                    const cv::Mat &cameraTranslation);
-
         void decomposeEssentialMatrix(const cv::Mat &essentialMatrix,
                                       const cv::Mat &inliers1,
                                       const cv::Mat &inliers2,
@@ -27,8 +23,7 @@ class EssentialMatrix {
         std::vector<T> applyMask(const std::vector<T>& InputArray,
                             const std::vector<uchar>& mask);
 
-        cv::Mat normalizePoints(const cv::Mat& K_inverse,
-                                const std::vector<cv::Point2f>& imagePoint);
+        cv::Mat normalizePoints(const std::vector<cv::Point2f>& imagePoint);
                                       
         
         double calculateDepth(const cv::Mat &rotationRow1,
@@ -41,8 +36,8 @@ class EssentialMatrix {
         EssentialMatrix(Calibration cameraCalibration);
         void determineEssentialMatrix(const std::vector<cv::Point2f> &pointsCamera1,
                                       const std::vector<cv::Point2f> &pointsCamera2,
-                                      cv::OutputArray cameraRotation,
-                                      cv::OutputArray cameraTranslation);
+                                      cv::Mat &cameraRotation,
+                                      cv::Mat &cameraTranslation);
 
 };
 
