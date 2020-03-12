@@ -31,7 +31,7 @@ void Calibration::saveCalibration(filesystem::path filepath) {
 
     cout << "Saving calibration to " << filepath.c_str() << endl;
     
-    cv::FileStorage fs(filepath, cv::FileStorage::WRITE);
+    cv::FileStorage fs(filepath.string(), cv::FileStorage::WRITE);
     fs << cameraMatrixSerName << cameraMatrix;
     fs << optimalMatrixSerName << optimalCameraMatrix;
     fs << distortionCoefficientsSerName << distortionCoefficients;
@@ -51,7 +51,7 @@ void Calibration::loadCalibration(filesystem::path filepath) {
 
     cout << "Loading calibration from file " << filepath.c_str() << endl;
 
-    cv::FileStorage fs(filepath, cv::FileStorage::READ);
+    cv::FileStorage fs(filepath.string(), cv::FileStorage::READ);
     cameraMatrix = fs[cameraMatrixSerName].mat();
     optimalCameraMatrix = fs[optimalMatrixSerName].mat();
     distortionCoefficients = fs[distortionCoefficientsSerName].mat();
