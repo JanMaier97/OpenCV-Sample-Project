@@ -11,7 +11,7 @@ using namespace cv;
 
 void PlyModelExporter::exportPointCloud(const filesystem::path& filepath,
                                         const Mat& worldPoints) {
-    assert(worldPoints.cols == 3);
+    assert(worldPoints.rows == 3);
 
     if (filepath.has_parent_path() && !filesystem::exists(filepath.parent_path()))
         throw runtime_error("The directory path for the file " + filepath.string() + " does not exist.");
@@ -53,10 +53,10 @@ void PlyModelExporter::writeHeader(ofstream& outputfile, const Mat& vertices) {
 
 void PlyModelExporter::writeVertexList(ofstream& outputfile, const Mat& vertices) {
 
-    for (size_t row = 0; row < vertices.rows; row++) {
-        outputfile << vertices.at<float>(row, 0) << " ";
-        outputfile << vertices.at<float>(row, 1) << " ";
-        outputfile << vertices.at<float>(row, 2) << endl;
+    for (size_t col = 0; col < vertices.cols; col++) {
+        outputfile << vertices.at<float>(0, col) << " ";
+        outputfile << vertices.at<float>(1, col) << " ";
+        outputfile << vertices.at<float>(2, col) << endl;
     }
 
 }

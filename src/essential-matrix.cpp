@@ -57,10 +57,60 @@ void EssentialMatrix::determineEssentialMatrix(const vector<Point2f> &pointsCame
     /* cout << essentialMatrix << endl; */
 
     // decomposes the essential matrix into 2 possible rotation matrices and 1 translation vector
-    Mat rotation, translation;
     decomposeEssentialMatrix(essentialMatrix, inliners1, inliners2,  cameraRotation,  cameraTranslation);
 
-    cout << "found rotation and camera rotation" << endl;
+    /* cout << "found rotation and camera rotation" << endl; */
+    /* Mat extrincts1; */
+    /* Mat extrincts2; */
+
+    /* cv::hconcat(Mat::diag(Mat::ones(1, 3, CV_64FC1)), Mat::zeros(3, 1, CV_64FC1), extrincts1); */ 
+    /* cv::hconcat(cameraRotation, cameraTranslation, extrincts2); */ 
+
+    /* cout << "calculating projection matrices .." << endl; */
+    /* cout << cameraCalibration.getInstrincs() << endl; */
+    /* cout << cameraCalibration.getCameraMatrix() << endl; */
+    /* Mat p1 = cameraCalibration.getInstrincs() * extrincts1; */
+    /* Mat p2 = cameraCalibration.getInstrincs() * extrincts2; */
+
+    /* cout << "copying points.. " << endl; */
+    /* Mat points1 = Mat_<double>(inliners1.cols, inliners1.rows);; */
+    /* Mat points2= Mat_<double>(2, inliners1.rows); */
+    /* for (int i = 0; i < inliners1.rows; i++) { */
+    /*     points1.at<double>(0, i) = inliners1.at<double>(i, 0); */
+    /*     points1.at<double>(1, i) = inliners1.at<double>(i, 1); */
+    /*     points2.at<double>(0, i) = inliners2.at<double>(i, 0); */
+    /*     points2.at<double>(1, i) = inliners2.at<double>(i, 1); */
+    /* } */
+
+    /* pointsCamera1.convertTo(pointsCamera1, CV_32FC1); */
+    /* pointsCamera2.convertTo(pointsCamera2, CV_32FC1); */
+    /* Mat1f worldPoints; */
+    /* worldPoints.convertTo(worldPoints, CV_32FC1); */
+
+    /* cv::triangulatePoints(p1, p2, pointsCamera1, pointsCamera2, worldPoints); */
+    /* cout << pointsCamera1.size() << endl; */
+    /* cout << worldPoints.size() << endl; */
+
+    /* cout << worldPoints.type() << " " << worldPoints.cols << endl; */
+
+    /* cout << worldPoints.col(0) << endl; */
+
+    /* cout << "exporting.." << endl; */
+    /* Mat newWorldPoints(3, worldPoints.cols, CV_32FC1); */
+    /* for (int i = 0; i < worldPoints.cols; i++) { */
+    /*     newWorldPoints.at<float>(0, i) = (worldPoints.at<float>(0, i) / worldPoints.at<float>(3, i)) * 100; */
+    /*     newWorldPoints.at<float>(1, i) = (worldPoints.at<float>(1, i) / worldPoints.at<float>(3, i)) * 100; */
+    /*     newWorldPoints.at<float>(2, i) = (worldPoints.at<float>(2, i) / worldPoints.at<float>(3, i)) * 100; */
+        /* cout << worldPoints.at<float>(0, i) / worldPoints.at<float>(3, i) << endl; */
+        /* cout << worldPoints.at<float>(1, i) / worldPoints.at<float>(3, i) << endl; */
+        /* cout << worldPoints.at<float>(2, i) / worldPoints.at<float>(3, i) << endl; */
+        /* cout << worldPoints.at<float>(3, i) / worldPoints.at<float>(3, i) << endl; */
+    /* } */
+
+
+    /* PlyModelExporter exporter; */
+    /* exporter.exportPointCloud("./resources/testPoints2.ply", newWorldPoints); */
+    /* cout << "exported" << endl; */
 }
 
 
@@ -114,8 +164,6 @@ int EssentialMatrix::pointsInfrontCamera(const cv::Mat inliners1,
     assert(cameraTranslation.rows == 3 && cameraTranslation.cols == 1);
     
     int count = 0;
-    Mat worldPoints1;
-    Mat worldPoints2;
     for (size_t index = 0; index < inliners1.rows; index++) {
         double z1 = calculateDepth(cameraRotation.row(0), cameraRotation.row(2), cameraTranslation, inliners2.at<double>(index, 0), inliners1.row(index).t());
 
@@ -126,9 +174,6 @@ int EssentialMatrix::pointsInfrontCamera(const cv::Mat inliners1,
 
         double x2 = inliners1.at<double>(index, 0) * z2;
         double y2 = inliners1.at<double>(index, 1) * z2;
-
-        worldPoints1.push_back(Mat(1, 3, CV_32FC1, {x1, y1, z1}));
-        worldPoints2.push_back(Mat(1, 3, CV_32FC1, {x2, y2, z2}));
 
         if (z1 > 0 && z2 > 0) { 
             count++;
