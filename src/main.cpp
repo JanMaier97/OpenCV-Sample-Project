@@ -1,5 +1,7 @@
 #include "feature-matching.hpp"
 #include "calibration.hpp"
+#include "essentialMatrix.hpp" 
+
 #include <string>
 #include <filesystem>
 #include "model-exporters.hpp"
@@ -53,6 +55,17 @@ int main(int argc, char *argv[]) {
     featureMatching.findMatches(img1, img2, imagePoints1, imagePoints2);
     
     cout << "matching successful" << endl;
+    EssentialMatrix essentialMatrixComputer(calb);
+
+    cv::Mat cameraRotation, cameraTranslation;
+    essentialMatrixComputer.determineEssentialMatrix(imagePoints1,
+                                                     imagePoints2,
+                                                     cameraRotation,
+                                                     cameraTranslation);
+                                                     
+
+
+
     cv::Mat test = (cv::Mat_<float>(3,5) << 5, 5, 5, 
                                              10, 20, 10,
                                              15, 13, 15,

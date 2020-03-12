@@ -52,12 +52,11 @@ void PlyModelExporter::writeHeader(ofstream& outputfile, const Mat& vertices) {
 }
 
 void PlyModelExporter::writeVertexList(ofstream& outputfile, const Mat& vertices) {
-    cout << vertices << endl;
 
-    for (size_t column = 0; column < vertices.cols; column++) {
-        outputfile << vertices.at<float>(0, column) << " ";
-        outputfile << vertices.at<float>(1, column) << " ";
-        outputfile << vertices.at<float>(2, column) << endl;
+    for (size_t col = 0; col < vertices.cols; col++) {
+        outputfile << vertices.at<float>(0, col) << " ";
+        outputfile << vertices.at<float>(1, col) << " ";
+        outputfile << vertices.at<float>(2, col) << endl;
     }
 
 }
