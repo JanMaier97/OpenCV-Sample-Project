@@ -12,11 +12,11 @@
 class Calibration {
 
 private:	
-    cv::Mat1d cameraMatrix = cv::Mat1d(3, 3);
-    cv::Mat1d optimalCameraMatrix = cv::Mat1d(3, 3);
+    cv::Mat1d cameraMatrix = cv::Mat1d(3, 3); //= cv::Mat1d(3, 3);
+    cv::Mat1d optimalCameraMatrix = cv::Mat1d(3, 3); // = cv::Mat1d(3, 3);
     cv::Mat1d distortionCoefficients;
-    std::vector<cv::Mat1d> rotationVectors;
-    std::vector<cv::Mat1d> translationVectors;
+    std::vector<cv::Mat> rotationVectors;
+    std::vector<cv::Mat> translationVectors;
 
     std::string cameraMatrixSerName = "cameraMatrix";
     std::string optimalMatrixSerName = "optimalMatrix";

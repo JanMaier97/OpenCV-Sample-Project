@@ -12,8 +12,8 @@ using namespace cv;
 
 
 Calibration::Calibration() {
-    cameraMatrix(0, 0) = 1;
-    cameraMatrix(1, 1) = 1;
+    cameraMatrix.at<double>(0, 0) = 1;
+    cameraMatrix.at<double>(1, 1) = 1;
 }
 
 
@@ -58,6 +58,10 @@ void Calibration::loadCalibration(filesystem::path filepath) {
     distortionCoefficients = fs[distortionCoefficientsSerName].mat();
     fs.release();
 
+    assert(cameraMatrix.type() == CV_64FC1);
+    assert(distortionCoefficients.type() == CV_64FC1);
+    assert(optimalCameraMatrix.type() == CV_64FC1);
+
     cout << "Successfully loaded calibration!" << endl;
 }
 
@@ -68,7 +72,7 @@ void Calibration::calibrate(vector<filesystem::path> imageFiles, Size boardSize)
     vector<Point3f> object;
 
     for (int tileCornerCounter = 0; tileCornerCounter < boardSize.area(); tileCornerCounter++) {
-        object.push_back(Point3f(tileCornerCounter / boardSize.width, tileCornerCounter % boardSize.width, 0.0f));
+        object.push_back(Point3f(tileCornerCounter / boardSize.width, tileCornerCounter % boardSize.width, 0.0));
     }
 
     Mat currentImage;
@@ -94,6 +98,7 @@ void Calibration::calibrate(vector<filesystem::path> imageFiles, Size boardSize)
         }
     }
 
+    cout << "calibrating" << endl;
     double calibrationOutput = calibrateCamera(objectPoints,
                                                imagePoints,
                                                currentImage.size(),
@@ -101,12 +106,16 @@ void Calibration::calibrate(vector<filesystem::path> imageFiles, Size boardSize)
                                                distortionCoefficients,
                                                rotationVectors,
                                                translationVectors);
+    assert(cameraMatrix.type() == CV_64FC1);
+    assert(distortionCoefficients.type() == CV_64FC1);
 
     cout << "Camera calibrated with output " << calibrationOutput << endl;
 
     // optimize cameraMatrix
     if (!currentImage.empty()) {
         optimalCameraMatrix = getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, currentImage.size(), 1, currentImage.size());
+
+        assert(optimalCameraMatrix.type() == CV_64FC1);
     } else {
         cout << "last images was empty. Failed to get image size." << endl;
     }
