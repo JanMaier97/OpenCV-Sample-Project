@@ -29,9 +29,9 @@ void Calibration::saveCalibration(filesystem::path filepath) {
     if (!directoryPath.empty() && !filesystem::exists(directoryPath))
         throw runtime_error("The provieded directoryPath " + directoryPath.string() + " does not exist.");
 
-    cout << "Saving calibration to " << filepath.c_str() << endl;
+    cout << "Saving calibration to " << filepath.string().c_str() << endl;
     
-    cv::FileStorage fs(filepath, cv::FileStorage::WRITE);
+    cv::FileStorage fs(filepath.string(), cv::FileStorage::WRITE);
     fs << cameraMatrixSerName << cameraMatrix;
     fs << optimalMatrixSerName << optimalCameraMatrix;
     fs << distortionCoefficientsSerName << distortionCoefficients;
@@ -49,9 +49,9 @@ void Calibration::loadCalibration(filesystem::path filepath) {
     if (!filesystem::exists(filepath))
         throw runtime_error("The file does not exist.");
 
-    cout << "Loading calibration from file " << filepath.c_str() << endl;
+    cout << "Loading calibration from file " << filepath.string().c_str() << endl;
 
-    cv::FileStorage fs(filepath, cv::FileStorage::READ);
+    cv::FileStorage fs(filepath.string(), cv::FileStorage::READ);
     cameraMatrix = fs[cameraMatrixSerName].mat();
     optimalCameraMatrix = fs[optimalMatrixSerName].mat();
     distortionCoefficients = fs[distortionCoefficientsSerName].mat();
