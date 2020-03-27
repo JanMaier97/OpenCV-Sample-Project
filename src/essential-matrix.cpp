@@ -44,17 +44,23 @@ void EssentialMatrix::determineEssentialMatrix(const vector<Point2f> &pointsCame
     vector<uchar> fundamentalMask;
     Mat1d fundametalMatrix = findFundamentalMat(pointsCamera1, pointsCamera2, FM_RANSAC, 0.1, 0.99, fundamentalMask);
 
+    cout << "points count: " << pointsCamera1.size() << endl;
     Mat1f inliners1 = homogenizePoints(applyMask<Point2f>(pointsCamera1, fundamentalMask));
     Mat1f inliners2 = homogenizePoints(applyMask<Point2f>(pointsCamera2, fundamentalMask));
-
-    cout << cameraCalibration.getInstrincs() << endl;
+    cout << "inliers1 count: " << inliners1.cols << endl;
 
     Mat1d essentialMatrix = cameraCalibration.getInstrincs().t() * fundametalMatrix * cameraCalibration.getInstrincs();
 
     decomposeEssentialMatrix(essentialMatrix, inliners1, inliners2, extrincts, projectionMatrix, worldPoints);
-    cout << "final matrices: " << endl;
-    cout << extrincts << endl;
-    cout << projectionMatrix << endl;
+
+    for (int i = 0; i < worldPoints.cols; i++) {
+        float dividend = worldPoints.at<float>(3, i);
+        worldPoints.at<float>(0, i) = worldPoints.at<float>(0, i) / dividend;
+        worldPoints.at<float>(1, i) = worldPoints.at<float>(1, i) / dividend;
+        worldPoints.at<float>(2, i) = worldPoints.at<float>(2, i) / dividend;
+        worldPoints.at<float>(3, i) = worldPoints.at<float>(3, i) / dividend;
+    }
+
     cout << worldPoints << endl;
 }
 
@@ -88,7 +94,7 @@ void EssentialMatrix::decomposeEssentialMatrix(const Mat1d& essentialMatrix,
     // TODO: fix image Points to always be float
     // TODO: check other variable types
     for (size_t i = 0; i < rotations.size(); i++) {
-
+        
         currentExtrincs = Mat1d(3,4);
         hconcat(rotations[i], translations[i], currentExtrincs); 
         currentProjectionMat = cameraCalibration.getInstrincs() * currentExtrincs;
@@ -99,7 +105,7 @@ void EssentialMatrix::decomposeEssentialMatrix(const Mat1d& essentialMatrix,
         if (currentPointsInfront > pointsInfront) {
             pointsInfront = currentPointsInfront;
             extrincts = currentExtrincs;
-            currentProjectionMat = projectionMatrix;
+            projectionMatrix = currentProjectionMat ;
             worldPoints = currentWorldPoints;
         }
     }
@@ -136,18 +142,18 @@ int EssentialMatrix::pointsInfrontCamera(const Mat1f& inliners1,
     p1.convertTo(p1, CV_32FC1);
     projectionMatrix.convertTo(p2, CV_32FC1);
     extrincts1.convertTo(extrincts1, CV_32FC1);
-    
+
     triangulatePoints(p1, projectionMatrix, inliners1.rowRange(0, 2), inliners2.rowRange(0, 2), worldPoints);
 
     int numberOfPointsInFront = 0;
     vector<int> pointMask;
 
     for (int i = 0; i < worldPoints.cols; i++) {
-        if (worldPoints.at<float>(2, i) > 0) 
+        if ((worldPoints.at<float>(2, i) > 0 && worldPoints.at<float>(3, i) > 0) ||  (worldPoints.at<float>(2, i) < 0 && worldPoints.at<float>(3, i) < 0)) {
             pointMask.push_back(1);
-        else
+            numberOfPointsInFront++;
+        } else
             pointMask.push_back(0);
-        numberOfPointsInFront++;
     }
 
     return numberOfPointsInFront;
