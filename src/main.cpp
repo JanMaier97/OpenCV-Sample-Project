@@ -65,8 +65,10 @@ int main(int argc, char *argv[]) {
                                                      projectionMatrix,
                                                      worldPoints);
     cout << worldPoints << endl;;
-    worldPoints = worldPoints * 100;
-    cout << worldPoints << endl;;
+    worldPoints = worldPoints;
+    cout << worldPoints << endl;
+
+    worldPoints.pop_back();
 
     PlyModelExporter exporter;
     exporter.exportPointCloud("./resources/test.ply", worldPoints);
